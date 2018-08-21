@@ -44,7 +44,11 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                     "fuzziness": "AUTO",
                 }
             },
-            "highlight": {"fields": {"content": {}}},
+            "highlight": {
+                "number_of_fragments": 1,  # How many phrases do we want to extract
+                "fragment_size": 70,  # How long shall the phrases be
+                "fields": {"content": {}},
+            },
         },
         _source=[
             "file.filename",
