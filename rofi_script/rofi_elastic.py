@@ -9,11 +9,13 @@ import subprocess
 rofi_search = Popen(
     args=["rofi", "-dmenu", "-i", "-p", "Search"], stdin=PIPE, stdout=PIPE
 )
+
 (stdout, stderr) = rofi_search.communicate(input="")
-word_to_search = stdout.decode("utf-8").replace("\n", "")
+search_value = stdout.decode("utf-8").replace("\n", "")
+
 es = Elasticsearch()
 res = es.search(
-    index="read_uni", body={"query": {"match": {"content": word_to_search}}}
+    index="read_uni", body={"query": {"match": {"content": search_value}}}
 )
 # print("Got %d Hits:" % res["hits"]["total"])
 if res["hits"]["total"] == 0:
