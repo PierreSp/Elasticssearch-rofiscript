@@ -45,9 +45,8 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
         all_files = {}
         all_files_title = []
         for hit in res["hits"]["hits"]:
-            pprint.pprint(hit)
+            # pprint.pprint(hit)
             try:
-
                 if hit["_source"]["meta"]["raw"]["title"] != "":
                     curtitle = hit["_source"]["meta"]["raw"]["title"]
                 else:
