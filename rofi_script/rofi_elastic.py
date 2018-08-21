@@ -1,5 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+"""rofi_elastic.py: Script for rofi which connects elasticsearch and rofi
+   Author Pierre Springer
+   Needs a working elasticsearch and 
+"""
 import subprocess
 from elasticsearch import Elasticsearch
 from subprocess import Popen, PIPE
@@ -22,6 +27,7 @@ searchrofi_input = ""
 i = 0
 search_value = "predefinednon"
 
+# Stop when the user cancels the search, but continue, when nothing is found
 while i < 5 and search_value != "" and search_value != "Nothing found":
     i += 1
     search_value = create_search(searchrofi_input)
@@ -40,7 +46,12 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
             },
             "highlight": {"fields": {"content": {}}},
         },
-        _source=["file.filename", "path.real", "meta.raw.title"],
+        _source=[
+            "file.filename",
+            "path.real",
+            "meta.raw.title",
+            "meta.raw.description",
+        ],
     )
     if res["hits"]["total"] == 0:
         searchrofi_input = "Nothing found"
@@ -53,14 +64,18 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
             try:
                 try:
                     curtitle = hit["_source"]["meta"]["raw"]["title"]
-                except Exception as ex:
+                except Exception as ex:  # only means that field does not exist
                     curtitle = hit["_source"]["file"]["filename"]
+                try:
+                    curdescr = hit["_source"]["meta"]["raw"]["description"]
+                except Exception as ex:  # only means that field does not exist
+                    curdescr = str(hit["highlight"]["content"][0]).replace("\n", "")
                 curtitle = (
                     str(curtitle)
                     + " | "
                     + str(hit["_source"]["path"]["real"])[0:30]
                     + " | "
-                    + str(hit["highlight"]["content"][0]).replace("\n", "")
+                    + str(curdescr)
                 )
                 all_files_title.append(curtitle)
                 all_files[curtitle] = hit["_source"]["path"]["real"]
