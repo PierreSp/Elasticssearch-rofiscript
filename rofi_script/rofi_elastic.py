@@ -31,11 +31,12 @@ search_value = "predefinednon"
 while i < 5 and search_value != "" and search_value != "Nothing found":
     i += 1
     search_value = create_search(searchrofi_input)
-    print(search_value)
+    # print(search_value)
     # Search with elasticnet. Fuzzy allows edit distance (e.g. typos),
     # fields are the fields to scan, source reduces the output
     res = es.search(
         index="read_uni",
+        size=1000,
         body={
             "query": {
                 "multi_match": {
@@ -57,6 +58,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
             "meta.raw.description",
         ],
     )
+    print(res["hits"]["total"])
     if res["hits"]["total"] == 0:
         searchrofi_input = "Nothing found"
         print("No results found")
@@ -64,7 +66,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
         all_files = {}
         all_files_title = []
         for hit in res["hits"]["hits"]:
-            pprint.pprint(hit)
+            # pprint.pprint(hit)
             try:
                 try:
                     curtitle = hit["_source"]["meta"]["raw"]["title"]
@@ -86,7 +88,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
             except Exception as e:
                 print(e)
                 continue
-
+        print(len(all_files_title))
         rofi_results = Popen(
             args=["rofi", "-dmenu", "-i", "-p", "Result"], stdin=PIPE, stdout=PIPE
         )
