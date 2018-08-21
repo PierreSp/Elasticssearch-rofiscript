@@ -26,6 +26,8 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
     i += 1
     search_value = create_search(searchrofi_input)
     print(search_value)
+    # Search with elasticnet. Fuzzy allows edit distance (e.g. typos),
+    # fields are the fields to scan, source reduces the output
     res = es.search(
         index="read_uni",
         body={
@@ -35,8 +37,10 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                     "query": search_value,
                     "fuzziness": "AUTO",
                 }
-            }
+            },
+            "highlight": {"fields": {"content": {}}},
         },
+        _source=["file.filename", "path.real", "meta.raw.title"],
     )
     if res["hits"]["total"] == 0:
         searchrofi_input = "Nothing found"
@@ -45,18 +49,24 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
         all_files = {}
         all_files_title = []
         for hit in res["hits"]["hits"]:
-            # pprint.pprint(hit)
+            pprint.pprint(hit)
             try:
-                if hit["_source"]["meta"]["raw"]["title"] != "":
+                try:
                     curtitle = hit["_source"]["meta"]["raw"]["title"]
-                else:
+                except Exception as ex:
                     curtitle = hit["_source"]["file"]["filename"]
-                curtitle = str(curtitle) + " | "+ str(hit["_source"]["path"]["real"])
+                curtitle = (
+                    str(curtitle)
+                    + " | "
+                    + str(hit["_source"]["path"]["real"])[0:30]
+                    + " | "
+                    + str(hit["highlight"]["content"][0]).replace("\n", "")
+                )
                 all_files_title.append(curtitle)
                 all_files[curtitle] = hit["_source"]["path"]["real"]
             except Exception as e:
                 print(e)
-                pass
+                continue
 
         rofi_results = Popen(
             args=["rofi", "-dmenu", "-i", "-p", "Result"], stdin=PIPE, stdout=PIPE
