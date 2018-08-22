@@ -9,7 +9,16 @@ import subprocess
 from elasticsearch import Elasticsearch
 from subprocess import Popen, PIPE
 import pprint
+import argparse
 
+
+parser = argparse.ArgumentParser(description='')
+parser.add_argument('--index', default="read_uni", type=str,
+                    help='Index to use for elastic search')
+
+opt = parser.parse_args()
+
+INDEX = opt.index
 
 def create_search(searchrofi_input):
     # Create a terminal -i makes the search case insensitive
@@ -35,7 +44,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
     # Search with elasticnet. Fuzzy allows edit distance (e.g. typos),
     # fields are the fields to scan, source reduces the output
     res = es.search(
-        index="read_uni",
+        index=INDEX,
         size=1000,
         body={
             "query": {
@@ -66,7 +75,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
         all_files = {}
         all_files_title = []
         for hit in res["hits"]["hits"]:
-            # pprint.pprint(hit)
+            pprint.pprint(hit)
             try:
                 try:
                     curtitle = hit["_source"]["meta"]["raw"]["title"]

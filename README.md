@@ -35,7 +35,8 @@ Follow [this](https://fscrawler.readthedocs.io/en/fscrawler-2.5/user/getting_sta
 After creating a job_name, make sure to define the correct path in *.fscrawler/job_name/_settings.json* and setup your time, bytesize if needed.
 
 ### Usage with rofi:
-in *rofiscripts/rofi_elastic.py* replace *index=read_uni* with your job_name. Install the requirements.txt and run the script to use rofi with elastic search. This can also easily be used with i3.
+in *rofiscripts/rofi_elastic.py* replace the default parameter for the argparser with your index (job_name). Alternatively the index can be submitted with the --index parameter.
+Install the requirements.txt and run the script to use rofi with elastic search. This can also easily be used with i3.
 
 ## Resources:
 - [Jupyter Notebook for Python search](https://github.com/ernestorx/es-swapi-test/blob/master/ES%20notebook.ipynb)
