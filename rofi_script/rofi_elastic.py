@@ -6,19 +6,23 @@
    Needs a working elasticsearch and 
 """
 import subprocess
-from elasticsearch import Elasticsearch
-from subprocess import Popen, PIPE
+import re
 import pprint
 import argparse
+from elasticsearch import Elasticsearch
+from subprocess import Popen, PIPE
 
+REMOVEHOME = re.compile("\/home\/.*?\/(.*)")
 
-parser = argparse.ArgumentParser(description='')
-parser.add_argument('--index', default="read_uni", type=str,
-                    help='Index to use for elastic search')
+parser = argparse.ArgumentParser(description="")
+parser.add_argument(
+    "--index", default="read_uni", type=str, help="Index to use for elastic search"
+)
 
 opt = parser.parse_args()
 
 INDEX = opt.index
+
 
 def create_search(searchrofi_input):
     # Create a terminal -i makes the search case insensitive
@@ -46,6 +50,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
     res = es.search(
         index=INDEX,
         size=1000,
+        # char_filter=[ "html_strip" ],
         body={
             "query": {
                 "multi_match": {
@@ -55,8 +60,11 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 }
             },
             "highlight": {
+                "pre_tags": ["*"],
+                "post_tags": ["*"],
+                "order": "score",
                 "number_of_fragments": 1,  # How many phrases do we want to extract
-                "fragment_size": 70,  # How long shall the phrases be
+                "fragment_size": 45,  # How long shall the phrases be
                 "fields": {"content": {}},
             },
         },
@@ -78,17 +86,22 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
             pprint.pprint(hit)
             try:
                 try:
-                    curtitle = hit["_source"]["meta"]["raw"]["title"]
+                    curtitle = str(hit["_source"]["meta"]["raw"]["title"])
                 except Exception as ex:  # only means that field does not exist
-                    curtitle = hit["_source"]["file"]["filename"]
+                    curtitle = str(hit["_source"]["file"]["filename"])
                 try:
                     curdescr = hit["_source"]["meta"]["raw"]["description"]
                 except Exception as ex:  # only means that field does not exist
                     curdescr = str(hit["highlight"]["content"][0]).replace("\n", "")
+                # Cut or extend title to a length of 30
+                if len(curtitle) > 27:
+                    curtitle = curtitle[0:27] + "..."
+                else:
+                    curtitle = curtitle + " " * (30 - len(curtitle))
                 curtitle = (
-                    str(curtitle)
+                    curtitle
                     + " | "
-                    + str(hit["_source"]["path"]["real"])[0:30]
+                    + REMOVEHOME.match(str(hit["_source"]["path"]["real"]))[1][0:30]
                     + " | "
                     + str(curdescr)
                 )
