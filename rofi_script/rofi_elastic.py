@@ -12,7 +12,8 @@ import argparse
 from elasticsearch import Elasticsearch
 from subprocess import Popen, PIPE
 
-REMOVEHOME = re.compile("\/home\/.*?\/(.*)")
+
+REMOVEHOME = re.compile("\/home\/.*?\/.*?\/(.*)")
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument(
@@ -60,8 +61,8 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 }
             },
             "highlight": {
-                "pre_tags": ["*"],
-                "post_tags": ["*"],
+                "pre_tags": ['<span foreground="CYAN" size="large">'],
+                "post_tags": ["</span>"],
                 "order": "score",
                 "number_of_fragments": 1,  # How many phrases do we want to extract
                 "fragment_size": 45,  # How long shall the phrases be
@@ -93,18 +94,20 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                     curdescr = hit["_source"]["meta"]["raw"]["description"]
                 except Exception as ex:  # only means that field does not exist
                     curdescr = str(hit["highlight"]["content"][0]).replace("\n", "")
-                # Cut or extend title to a length of 30
-                if len(curtitle) > 27:
-                    curtitle = curtitle[0:27] + "..."
+                # Cut or extend title to a length of 25
+                if len(curtitle) > 22:
+                    curtitle = curtitle[0:22] + "..."
                 else:
-                    curtitle = curtitle + " " * (30 - len(curtitle))
-                curtitle = (
-                    curtitle
-                    + " | "
-                    + REMOVEHOME.match(str(hit["_source"]["path"]["real"]))[1][0:30]
-                    + " | "
-                    + str(curdescr)
-                )
+                    curtitle = curtitle + " " * (25 - len(curtitle))
+
+                filepath = str(REMOVEHOME.match(str(hit["_source"]["path"]["real"]))[1])
+                # Cut or extend path to a length of 30
+                if len(filepath) > 27:
+                    filepath = filepath[0:27] + "..."
+                else:
+                    filepath = filepath + " " * (30 - len(filepath))
+
+                curtitle = curtitle + " | " + filepath + " | " + str(curdescr)
                 all_files_title.append(curtitle)
                 all_files[curtitle] = hit["_source"]["path"]["real"]
             except Exception as e:
@@ -112,7 +115,9 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 continue
         print(len(all_files_title))
         rofi_results = Popen(
-            args=["rofi", "-dmenu", "-i", "-p", "Result"], stdin=PIPE, stdout=PIPE
+            args=["rofi", "-dmenu", "-i", "-p", "-markup-rows", "Result"],
+            stdin=PIPE,
+            stdout=PIPE,
         )
         (stdout, stderr) = rofi_results.communicate(
             input=str.encode("\n".join(all_files_title))
