@@ -39,5 +39,6 @@ in *rofiscripts/rofi_elastic.py* replace the default parameter for the argparser
 Install the requirements.txt and run the script to use rofi with elastic search. This can also easily be used with i3.
 
 ## Resources:
+- [Great terminal tool](https://github.com/kipfstuhl/fssearch)
 - [Jupyter Notebook for Python search](https://github.com/ernestorx/es-swapi-test/blob/master/ES%20notebook.ipynb)
 - [Blog Python and elastic](https://tryolabs.com/blog/2015/02/17/python-elasticsearch-first-steps/)
