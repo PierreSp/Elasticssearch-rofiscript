@@ -61,7 +61,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 }
             },
             "highlight": {
-                "pre_tags": ['<span foreground="CYAN" size="large">'],
+                "pre_tags": ['<span foreground="CYAN">'],
                 "post_tags": ["</span>"],
                 "order": "score",
                 "number_of_fragments": 1,  # How many phrases do we want to extract
