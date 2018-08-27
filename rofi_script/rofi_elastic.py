@@ -64,8 +64,8 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 "pre_tags": ['<span foreground="CYAN">'],
                 "post_tags": ["</span>"],
                 "order": "score",
-                "number_of_fragments": 1,  # How many phrases do we want to extract
-                "fragment_size": 45,  # How long shall the phrases be
+                "number_of_fragments": 3,  # How many phrases do we want to extract
+                "fragment_size": 55,  # How long shall the phrases be
                 "fields": {"content": {}},
             },
         },
@@ -94,6 +94,14 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                     curdescr = hit["_source"]["meta"]["raw"]["description"]
                 except Exception as ex:  # only means that field does not exist
                     curdescr = str(hit["highlight"]["content"][0]).replace("\n", "")
+                    try:
+                        curdescr += '<span foreground="RED"> | </span>'
+                        curdescr += str(hit["highlight"]["content"][1]).replace("\n", "")
+                        # curdescr += '<span foreground="RED">;;</span>'
+                        # curdescr += str(hit["highlight"]["content"][2]).replace("\n", "")
+                    except Exception as e:
+                        pass
+                    curdescr = re.sub(' +', ' ',curdescr) # remove multiple spaces
                 # Cut or extend title to a length of 25
                 if len(curtitle) > 22:
                     curtitle = curtitle[0:22] + "..."
@@ -115,7 +123,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 continue
         print(len(all_files_title))
         rofi_results = Popen(
-            args=["rofi", "-dmenu", "-i", "-p", "-markup-rows", "Result"],
+            args=["rofi", "-dmenu", "-i", "-p", "Result"],
             stdin=PIPE,
             stdout=PIPE,
         )
