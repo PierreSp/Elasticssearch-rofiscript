@@ -17,7 +17,7 @@ REMOVEHOME = re.compile("\/home\/.*?\/.*?\/(.*)")
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument(
-    "--index", default="read_uni", type=str, help="Index to use for elastic search"
+    "--index", default="_all", type=str, help="Index to use for elastic search"
 )
 
 opt = parser.parse_args()
