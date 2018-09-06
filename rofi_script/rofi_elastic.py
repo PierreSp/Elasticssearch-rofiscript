@@ -123,7 +123,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 continue
         print(len(all_files_title))
         rofi_results = Popen(
-            args=["rofi", "-dmenu", "-i", "-p", "Result"],
+            args=["rofi", "-dmenu","-markup-rows", "-i", "-p", "Result"],
             stdin=PIPE,
             stdout=PIPE,
         )
