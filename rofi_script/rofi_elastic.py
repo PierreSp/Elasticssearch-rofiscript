@@ -3,15 +3,15 @@
 
 """rofi_elastic.py: Script for rofi which connects elasticsearch and rofi
    Author Pierre Springer
-   Needs a working elasticsearch and 
+   Needs a working elasticsearch installation
 """
-import subprocess
-import re
-import pprint
 import argparse
-from elasticsearch import Elasticsearch
-from subprocess import Popen, PIPE
+import pprint
+import re
+import subprocess
+from subprocess import PIPE, Popen
 
+from elasticsearch import Elasticsearch
 
 REMOVEHOME = re.compile("\/home\/.*?\/.*?\/(.*)")
 
@@ -31,7 +31,8 @@ def create_search(searchrofi_input):
         args=["rofi", "-dmenu", "-i", "-p", "Search"], stdin=PIPE, stdout=PIPE
     )
 
-    (stdout, stderr) = rofi_search.communicate(input=str.encode(searchrofi_input))
+    (stdout, stderr) = rofi_search.communicate(input=str.encode(
+        searchrofi_input))
     search_value = stdout.decode("utf-8").replace("\n", "")
     return search_value
 
@@ -64,7 +65,7 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 "pre_tags": ['<span foreground="CYAN">'],
                 "post_tags": ["</span>"],
                 "order": "score",
-                "number_of_fragments": 3,  # How many phrases do we want to extract
+                "number_of_fragments": 3,  # number phrases to extract
                 "fragment_size": 55,  # How long shall the phrases be
                 "fields": {"content": {}},
             },
@@ -96,19 +97,19 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                     curdescr = str(hit["highlight"]["content"][0]).replace("\n", "")
                     try:
                         curdescr += '<span foreground="RED"> | </span>'
-                        curdescr += str(hit["highlight"]["content"][1]).replace("\n", "")
-                        # curdescr += '<span foreground="RED">;;</span>'
-                        # curdescr += str(hit["highlight"]["content"][2]).replace("\n", "")
+                        curdescr += str(hit["highlight"]["content"]
+                                        [1]).replace("\n", "")
                     except Exception as e:
                         pass
-                    curdescr = re.sub(' +', ' ',curdescr) # remove multiple spaces
+                    curdescr = re.sub(' +', ' ', curdescr)  # remove spaces
                 # Cut or extend title to a length of 25
                 if len(curtitle) > 22:
                     curtitle = curtitle[0:22] + "..."
                 else:
                     curtitle = curtitle + " " * (25 - len(curtitle))
 
-                filepath = str(REMOVEHOME.match(str(hit["_source"]["path"]["real"]))[1])
+                filepath = str(REMOVEHOME.match(str(hit["_source"]
+                                                    ["path"]["real"]))[1])
                 # Cut or extend path to a length of 30
                 if len(filepath) > 27:
                     filepath = filepath[0:27] + "..."
@@ -123,7 +124,8 @@ while i < 5 and search_value != "" and search_value != "Nothing found":
                 continue
         print(len(all_files_title))
         rofi_results = Popen(
-            args=["rofi", "-dmenu","-markup-rows", "-i", "-p", "Result"],
+            args=["rofi", "-dmenu", "-markup-rows", "-i",
+                  "-p", "Result"],
             stdin=PIPE,
             stdout=PIPE,
         )
